@@ -1,13 +1,16 @@
-function Spit () {
+module.exports = function Spit () {
+	var nowDate = new Date();
+	this.date = nowDate.getUTCDate() +'.'+ parseInt(nowDate.getMonth() + 1) +'.'+nowDate.getFullYear()
 	this.save = function(db,reason){
-		var date = new Date('DD-MM-YYYY');
-		db.put(date, reason);
+		db.put(this.date, reason);
 	}
-	this.getSpitReasons = function(db, dateS, dateE, cb){
+	this.getSpitReasons = function(db, date, cb){
 		var spits = []; // Spits is an array of spit objects, which contain date and reason properties
-		db.createReadStream({start: dateS, end: dateE}) // Get data from dateS(tart) to DateE(nd)
+		db.createReadStream({start: date}) 
 			.on('data', function(data){
-				spits.push({date: data.key, reason: data.value});
+				if (data.key === date){
+					spits.push({date: data.key, reason: data.value});
+				}
 			})
 			.on('error', function(err){
 				cb(err);
@@ -16,4 +19,5 @@ function Spit () {
 				cb(null, spits);
 			})
 	}
+	return this;
 }
